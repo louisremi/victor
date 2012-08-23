@@ -1,0 +1,118 @@
+<!doctype html>
+<html>
+<head>
+</head>
+<body>
+	<h1>SVG to JSON converter</h1>
+	<h2>1. Prepare your svg file</h2>
+	<h2>2. Open it <input type="file" id="file" /></h2>
+	
+	<div id="input"></div>
+	<h2>3. Tweak</h2>
+	
+	<h2>4. And <input type="button" id="convert" value="Convert" /></h2>
+	<textarea id="textarea" style="width: 80em; height: 30em;"></textarea>
+	<h2>5. <input type="button" id="render" value="Render" /> with Victor</h2>
+	<div id="output"></div>
+
+	<script src="victor.js"></script>
+	<script>
+		var file = $("#file"),
+			input = $("#input"),
+			output = $("#output"),
+			convert = $("#convert"),
+			textarea = $("#textarea"),
+			render = $("#render"),
+			defaults = {
+				fill: "none",
+				fillOpacity: 1,
+				stroke: "none",
+				strokeOpacity: 1,
+				strokeWidth: "1px"
+			};
+
+		file.value = "";
+		file.onchange = function( event ) {
+			if ( !file.files.length ) { return; }
+
+			var freader = new FileReader();
+			freader.onload = function( e ) {
+				input.innerHTML = e.target.result;
+			};
+			freader.readAsText( file.files[0] );
+
+		};
+
+		convert.onclick = function() {
+			if ( input.innerHTML == "" ) { return; }
+
+			var paths = input.getElementsByTagName("path"),
+				svg = input.firstElementChild,
+				i = paths.length,
+				obj = {
+					width: svg.getAttribute("width"),
+					height: svg.getAttribute("height"),
+					children: []
+				},
+				path, computedStyle, style = {}, key, tmp;
+
+			while ( i-- ) {
+				path = paths[i];
+
+				// store computed style if != from their default values
+				computedStyle = window.getComputedStyle( path );
+				for ( key in defaults ) {
+					if ( ( tmp = computedStyle[ key ] ) != defaults[ key ] ) {
+						// convert rgb() colors to #hex equivalent
+						if ( /^rgb\(/.test( tmp ) ) {
+							tmp = "#" + tmp.replace( /\D*(\d*)\D*/g, function( a, b ) {
+								return b ? (+b).toString(16) : b;
+							});
+						}
+						style[ key ] = tmp;
+					}
+				}
+
+				obj.children.push({
+					id: path.id || undefined,
+					d: simplify( path.getAttribute("d"), .1 ),
+					className: path.getAttribute("class") || undefined,
+					style: style
+				});
+			}
+
+			textarea.innerHTML = JSON.stringify( obj );
+		};
+
+		render.onclick = function() {
+			if ( textarea.innerHTML == "" ) { return; }
+
+			renderOutput( JSON.parse( textarea.innerHTML ) );
+		};
+
+		function $( selector ) {
+			return document.querySelector( selector );
+		}
+
+		function renderOutput( obj ) {
+			output.innerHTML = "";
+
+			var canvas = Victor.canvas( obj.width, obj.height ),
+				i = obj.children.length,
+				path;
+
+			while ( i-- ) {
+				path = Victor.path( canvas, obj.children[i] );
+				Victor.style( path, obj.children[i].style );
+				canvas.appendChild( path );
+			}
+
+			output.appendChild( canvas );
+		}
+
+		// simplify( pathStr, precision ); with 0.1 precision, 0.333 => 0.3, with 0.01 precision 0.333 => 0.33
+		var rsimplify = /(-?\d.*?)(,| |$)/g;
+		function simplify(a,b){return a.replace(rsimplify,function(a,c,d){return Math.round(parseFloat(c)/b)/(1/b)+d})};
+	</script>
+</body>
+</html>
