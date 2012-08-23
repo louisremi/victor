@@ -19,7 +19,7 @@
 	<script>
 		var file = $("#file"),
 			input = $("#input"),
-			tiger = $("#tiger"),
+			//tiger = $("#tiger"),
 			output = $("#output"),
 			convert = $("#convert"),
 			textarea = $("#textarea"),
@@ -44,9 +44,9 @@
 
 		};
 
-		tiger.onclick = function() {
+		/*tiger.onclick = function() {
 
-		}
+		};*/
 
 		convert.onclick = function() {
 			if ( input.innerHTML == "" ) { return; }
@@ -81,6 +81,7 @@
 				}
 
 				obj.children.push({
+					nodeName: "path",
 					id: path.id || undefined,
 					d: simplify( path.getAttribute("d"), .1 ),
 					className: path.getAttribute("class") || undefined,
@@ -109,7 +110,7 @@
 				path;
 
 			while ( i-- ) {
-				path = Victor.path( canvas, obj.children[i] );
+				path = Victor.elem( obj.children[i] );
 				Victor.style( path, obj.children[i].style );
 				canvas.appendChild( path );
 			}

@@ -28,26 +28,32 @@ window.Victor = {
 
 			return div;
 		},
-	path: support == "svg" ?
-		function( canvas, path ) {
-			var p = document.createElementNS( "http://www.w3.org/2000/svg", "path" );
 
-			p.setAttribute( "d", path.d );
-			p.setAttribute( "id", path.id );
-			p.setAttribute( "className", path.className );
+	elem: function( nodeName, attrs ) {
+		var key, elem;
 
-			return p;
-		} :
-		function( canvas, path ) {
-			var p = document.createElement("v:shape"),
-				f = document.createElement("v:fill");
+		// used with an object only
+		if ( typeof nodeName != "string" ) {
+			attrs = nodeName;
+			nodeName = attrs.nodeName;
+			delete attrs.nodeName;
+		}
 
-			p.shape = CoreSVG.path( path.d );
+		elem = Victor.elemHooks[ nodeName in Victor.elemHooks ? nodeName : "_default" ]( nodeName );
 
-			p.appendChild( f );
+		for ( key in attrs ) {
+			elem.setAttribute( key, attrs[ key ] );
+		}
 
-			return p;
-		},
+		return elem;
+	},
+	elemHooks: {
+		_default: function( nodeName ) {
+			return document.createElementNS( "http://www.w3.org/2000/svg", nodeName );
+
+		}
+	},
+
 	style: function( path, styles, value ) {
 		var tmp = {}, key;
 
@@ -55,7 +61,7 @@ window.Victor = {
 		if ( typeof styles == "string" ) {
 			// used as getter
 			if ( !value ) {
-				return Victor.styleHooks[ key in Victor.styleHooks ? key : "dflt" ].get( path, styles );
+				return Victor.styleHooks[ key in Victor.styleHooks ? key : "_default" ].get( path, styles );
 
 			// used as unique setter 
 			} else {
@@ -65,12 +71,12 @@ window.Victor = {
 		}
 		// deal with multiple setter
 		for ( key in styles ) {
-			Victor.styleHooks[ key in Victor.styleHooks ? key : "dflt" ].set( path, key, styles[ key ] );
+			Victor.styleHooks[ key in Victor.styleHooks ? key : "_default" ].set( path, key, styles[ key ] );
 		}
 	},
 	styleHooks: {
 		// default hook
-		dflt: {
+		_default: {
 			get: function( path, key ) {
 				return document.getComputedStyle( path )[ key ];
 			},
@@ -79,18 +85,34 @@ window.Victor = {
 			}
 		}
 	},
+
 	// svg path data to vml shape converter
 	_p2s: function( path ) {
 		var tokens = this.tokenize( path ),
 			i = -1,
 			l = tokens.length,
 			result = "",
-			token, tmp, x, y;
+			token, cmd, x, y;
 
 		while ( ++i < l ) {
 			token = tokens[i];
 			if ( typeof token != "string" ) {
-				
+				// convert the token to a vml command
+				cmd = Victor.cmdHooks[ token.letter ]( token.val );
+
+				// reset x/y on first command or absolute command
+				if ( !x || /[A-Z]/.test( cmd.letter ) ) {
+					x = cmd.x;
+					y = cmd.y;
+
+				// update x/y if the command is a relative one
+				} else {
+					x += cmd.x;
+					y += cmd.y;
+
+				}
+
+				token = cmd.shape;
 			}
 			result += token;
 		}
@@ -111,9 +133,19 @@ if ( support != "svg" ) {
 			fill.color = value;
 		}
 	};
+	Victor.styleHooks.path = function( nodename, attrs ) {
+		var p = document.createElement("v:shape"),
+			f = document.createElement("v:fill");
+
+		p.shape = CoreSVG.path( path.d );
+
+		p.appendChild( f );
+
+		return p;
+	}
 }
 
-Victor
+Victor._p2s
 
 // Bridge for Core Framework
 function extend( obj1, obj2 ) {
