@@ -5,7 +5,7 @@
 <body>
 	<h1>SVG to JSON converter</h1>
 	<h2>1. Prepare your svg file</h2>
-	<h2>2. Open it <input type="file" id="file" /></h2>
+	<h2>2. Open it <input type="file" id="file" /><!-- <small>(or give the <input type="button" id="tger" value="tiger" /> a try)</small>--></h2>
 	
 	<div id="input"></div>
 	<h2>3. Tweak</h2>
@@ -19,6 +19,7 @@
 	<script>
 		var file = $("#file"),
 			input = $("#input"),
+			tiger = $("#tiger"),
 			output = $("#output"),
 			convert = $("#convert"),
 			textarea = $("#textarea"),
@@ -43,6 +44,10 @@
 
 		};
 
+		tiger.onclick = function() {
+
+		}
+
 		convert.onclick = function() {
 			if ( input.innerHTML == "" ) { return; }
 
@@ -54,10 +59,11 @@
 					height: svg.getAttribute("height"),
 					children: []
 				},
-				path, computedStyle, style = {}, key, tmp;
+				path, computedStyle, style, key, tmp;
 
 			while ( i-- ) {
 				path = paths[i];
+				style = {};
 
 				// store computed style if != from their default values
 				computedStyle = window.getComputedStyle( path );
@@ -69,6 +75,7 @@
 								return b ? (+b).toString(16) : b;
 							});
 						}
+
 						style[ key ] = tmp;
 					}
 				}

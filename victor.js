@@ -69,6 +69,7 @@ window.Victor = {
 		}
 	},
 	styleHooks: {
+		// default hook
 		dflt: {
 			get: function( path, key ) {
 				return document.getComputedStyle( path )[ key ];
@@ -77,6 +78,24 @@ window.Victor = {
 				path.style[ key ] = value;
 			}
 		}
+	},
+	// svg path data to vml shape converter
+	_p2s: function( path ) {
+		var tokens = this.tokenize( path ),
+			i = -1,
+			l = tokens.length,
+			result = "",
+			token, tmp, x, y;
+
+		while ( ++i < l ) {
+			token = tokens[i];
+			if ( typeof token != "string" ) {
+				
+			}
+			result += token;
+		}
+
+		return token;
 	}
 };
 
@@ -94,7 +113,7 @@ if ( support != "svg" ) {
 	};
 }
 
-
+Victor
 
 // Bridge for Core Framework
 function extend( obj1, obj2 ) {
