@@ -1,6 +1,7 @@
 <!doctype html>
 <html>
 <head>
+	<meta charset="UTF-8" />
 </head>
 <body>
 	<h1>SVG to JSON converter</h1>
@@ -15,22 +16,19 @@
 	<h2>5. <input type="button" id="render" value="Render" /> with Victor</h2>
 	<div id="output"></div>
 
-	<script src="victor.js"></script>
+	<script src="http://cdnjs.cloudflare.com/ajax/libs/lodash.js/0.6.1/lodash.min.js"></script>
+	<script src="script/victor.js"></script>
+	<script>window.Victor = Raphael.ninja();</script>
+	<!--<script src="http://cdnjs.cloudflare.com/ajax/libs/raphael/2.1.0/raphael.js"></script>-->
+	<script src="script/raphael.js"></script>
+	<script src="script/svgtojs.js"></script>
 	<script>
 		var file = $("#file"),
 			input = $("#input"),
-			//tiger = $("#tiger"),
 			output = $("#output"),
 			convert = $("#convert"),
 			textarea = $("#textarea"),
-			render = $("#render"),
-			defaults = {
-				fill: "none",
-				fillOpacity: 1,
-				stroke: "none",
-				strokeOpacity: 1,
-				strokeWidth: "1px"
-			};
+			render = $("#render");
 
 		file.value = "";
 		file.onchange = function( event ) {
@@ -44,83 +42,47 @@
 
 		};
 
-		/*tiger.onclick = function() {
-
-		};*/
-
 		convert.onclick = function() {
 			if ( input.innerHTML == "" ) { return; }
 
-			var paths = input.getElementsByTagName("path"),
-				svg = input.firstElementChild,
-				i = paths.length,
-				obj = {
-					width: svg.getAttribute("width"),
-					height: svg.getAttribute("height"),
-					children: []
-				},
-				path, computedStyle, style, key, tmp;
-
-			while ( i-- ) {
-				path = paths[i];
-				style = {};
-
-				// store computed style if != from their default values
-				computedStyle = window.getComputedStyle( path );
-				for ( key in defaults ) {
-					if ( ( tmp = computedStyle[ key ] ) != defaults[ key ] ) {
-						// convert rgb() colors to #hex equivalent
-						if ( /^rgb\(/.test( tmp ) ) {
-							tmp = "#" + tmp.replace( /\D*(\d*)\D*/g, function( a, b ) {
-								return b ? (+b).toString(16) : b;
-							});
-						}
-
-						style[ key ] = tmp;
-					}
-				}
-
-				obj.children.push({
-					nodeName: "path",
-					id: path.id || undefined,
-					d: simplify( path.getAttribute("d"), .1 ),
-					className: path.getAttribute("class") || undefined,
-					style: style
-				});
-			}
-
-			textarea.innerHTML = JSON.stringify( obj );
+			textarea.value = JSON.stringify( svgtojs( input.firstElementChild ) );
 		};
 
 		render.onclick = function() {
-			if ( textarea.innerHTML == "" ) { return; }
+			if ( textarea.value == "" ) { return; }
 
-			renderOutput( JSON.parse( textarea.innerHTML ) );
+			dummyRenderer( JSON.parse( textarea.value ) );
 		};
 
 		function $( selector ) {
 			return document.querySelector( selector );
 		}
 
-		function renderOutput( obj ) {
+		function dummyRenderer( obj ) {
 			output.innerHTML = "";
 
-			var canvas = Victor.canvas( obj.width, obj.height ),
-				i = obj.children.length,
-				path;
+			var paper = Victor( output, obj.width, obj.height );
 
-			while ( i-- ) {
-				path = Victor.elem( obj.children[i] );
-				Victor.style( path, obj.children[i].style );
-				canvas.appendChild( path );
-			}
+			_.each( obj.children, function( child ) {
+				var style = child.style,
+					tmp;
 
-			output.appendChild( canvas );
+				// Raphael has strange defaults
+				!style.fill && ( style.fill = "none" );
+				!style.stroke && ( style.stroke = "none" );
+
+				// convert gradients in raphael format
+				if ( typeof style.fill != "string" ) {
+					// you can get "to transparent" gradients in raphael by setting the fill-opacity to less than 1
+					if ( ( tmp = style.fill.stops[1].substr(7) ) ) {
+						style["fill-opacity"] = parseInt( tmp, 16 ) / 255;
+					}
+					style.fill = style.fill.angle + "-" + style.fill.stops[0].substr(0,7) + "-" + style.fill.stops[1].substr(0,7);
+				}
+
+				paper[ child.type ].apply( paper, child.attrs ).attr( style );
+			});
 		}
-
-		// simplify( pathStr, precision ); with 0.1 precision, 0.333 => 0.3, with 0.01 precision 0.333 => 0.33
-		var rsimplify = /(-?\d.*?)(,| |$)/g;
-		function simplify(a,b){return a.replace(rsimplify,function(a,c,d){return Math.round(parseFloat(c)/b)/(1/b)+d})};
 	</script>
 </body>
 </html>
