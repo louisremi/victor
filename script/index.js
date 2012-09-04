@@ -40,7 +40,7 @@ $tigerButton.onclick = function() {
 	onfileButtonClick( false );
 
 	var fileReq = new XMLHttpRequest();
-	fileReq.open("GET", "/samples/tiger.svg", true);
+	fileReq.open("GET", "../samples/tiger.svg", true);
 	fileReq.responseType = "arraybuffer";
 	 
 	fileReq.onload = function() {
