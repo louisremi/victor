@@ -30,10 +30,10 @@
         <h2>Convert your SVG files to lightweight, Raphael-compatible JSON</h2>
     </header>
 
-    <div class="row row-offset pagination-centered">
-        <div class="span12">
+    <div class="row row-offset">
+        <div class="span2 offset5 pagination-centered">
             <input type="file" accept="image/*" id="file-input" />
-            <input type="button" id="file-button" class="btn btn-large btn-primary" value="Select File">
+            <input type="button" id="file-button" class="btn btn-large btn-primary" value="Select File"/>
         </div>
     </div>
 
@@ -43,7 +43,9 @@
         <p class="span4">Output</p>
     </div>
     <div class="row">
-        <img class="span4 square" id="canvas-input" />
+        <div class="span4 square" id="canvas-input">
+            <p id="tiger">Give the <input type="button" class="btn btn-small" id="tiger-button" value="Tiger"/> a try</p>
+        </div>
         <textarea class="span4 square" id="json-output" resizable=false></textarea>
         <div id="canvas-output" class="span4 square">
         </div>

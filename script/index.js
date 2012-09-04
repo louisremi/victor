@@ -2,20 +2,21 @@
 
 var $fileInput = $("#file-input"),
 	$fileButton = $("#file-button"),
+	$tigerButton = $("#tiger-button"),
 	$canvasInput = $("#canvas-input"),
 	$jsonOutput = $("#json-output"),
 	$canvasOutput = $("#canvas-output"),
-	$svgFrame = window.frames[0];
+	$svgFrame = window.frames[0],
+	BlobBuilder = window.MozBlobBuilder || window.WebKitBlobBuilder || window.MSBlobBuilder || window.BlobBuilder;
 
 // reset textarea
 $jsonOutput.value = "";
 
-$fileButton.onclick = function() {
+function onfileButtonClick( event ) {
 	// reset fields
-	c( $canvasInput, "remove", "rendered" );
-	$canvasInput.src = "";
+	$canvasInput.innerHTML = "";
+	$canvasInput.style.backgroundImage = "";
 	$jsonOutput.value = "";
-	c( $canvasOutput, "remove", "rendered" );
 	$canvasOutput.innerHTML = "";
 
 	// add loader
@@ -24,12 +25,52 @@ $fileButton.onclick = function() {
 	c( $canvasOutput, "add", "loading" );
 
 	// proxy click to real file-input
-	$fileInput.click();
+	event && $fileInput.click();
 }
+$fileButton.onclick = onfileButtonClick;
 
 $fileInput.onchange = function( event ) {
 	if ( !$fileInput.files.length ) { return; }
 
+	convertFile( $fileInput.files[0] );
+};
+
+$tigerButton.onclick = function() {
+	// prepare the page as if the file button was clicked
+	onfileButtonClick( false );
+
+	var fileReq = new XMLHttpRequest();
+	fileReq.open("GET", "/samples/tiger.svg", true);
+	fileReq.responseType = "arraybuffer";
+	 
+	fileReq.onload = function() {
+	  var blobBuilder = new BlobBuilder();
+	  blobBuilder.append( fileReq.response );
+	  
+	  convertFile( blobBuilder.getBlob("image/svg+xml") );
+	};
+	fileReq.send();
+};
+
+function onjsonchange() {
+	if ( $jsonOutput.value == "" ) { return; }
+
+	var json = JSON.parse( $jsonOutput.value ),
+		width = Math.ceil( json.width ),
+		height = Math.ceil( json.height * 300 / 280 );
+
+	json.width = 280;
+	json.height = 300;
+
+	$canvasOutput.innerHTML = "";
+	c( $canvasOutput, "remove", "loading" );
+
+	dummyRenderer( $canvasOutput, json ).setViewBox(0,0,width,height,true);
+}
+$jsonOutput.onchange = onjsonchange;
+
+/* Utilities ------------------------------------------------------*/
+function convertFile( file ) {
 	var freader1 = new FileReader(),
 		freader2 = new FileReader();
 
@@ -42,37 +83,17 @@ $fileInput.onchange = function( event ) {
 
 		c( $jsonOutput, "remove", "loading" );
 	};
-	freader1.readAsText( $fileInput.files[0] );
+	freader1.readAsText( file );
 
 	// display a thumbnail of the svg
-	freader2.onload = function( e ) {
-		$canvasInput.src = e.target.result;
+	freader2.onload = function( e ) {console.log( e.target.result )
+		$canvasInput.style.backgroundImage = "url('" + e.target.result + "')";
 
 		c( $canvasInput, "remove", "loading" );
-		c( $canvasInput, "add", "rendered" );
 	};
-	freader2.readAsDataURL( $fileInput.files[0] );
+	freader2.readAsDataURL( file );
 }
 
-function onjsonchange() {
-	if ( $jsonOutput.value == "" ) { return; }
-
-	var json = JSON.parse( $jsonOutput.value ),
-		width = Math.ceil( json.width ),
-		height = Math.ceil( json.height );
-
-	json.width = 300;
-	json.height = Math.round( height * 300 / width );
-
-	$canvasOutput.innerHTML = "";
-	c( $canvasOutput, "add", "rendered" );
-	c( $canvasOutput, "remove", "loading" );
-
-	dummyRenderer( $canvasOutput, json ).setViewBox(0,0,width,height,true);
-}
-$jsonOutput.onchange = onjsonchange;
-
-/* Utilities ------------------------------------------------------*/
 function dummyRenderer( wrapper, json ) {
 	if ( typeof json == "string" ) {
 		json = JSON.parse( json );

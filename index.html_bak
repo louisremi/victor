@@ -1,0 +1,88 @@
+<!doctype html>
+<html>
+<head>
+	<meta charset="UTF-8" />
+</head>
+<body>
+	<h1>SVG to JSON converter</h1>
+	<h2>1. Prepare your svg file</h2>
+	<h2>2. Open it <input type="file" id="file" /><!-- <small>(or give the <input type="button" id="tger" value="tiger" /> a try)</small>--></h2>
+	
+	<div id="input"></div>
+	<h2>3. Tweak</h2>
+	
+	<h2>4. And <input type="button" id="convert" value="Convert" /></h2>
+	<textarea id="textarea" style="width: 80em; height: 30em;"></textarea>
+	<h2>5. <input type="button" id="render" value="Render" /> with Victor</h2>
+	<div id="output"></div>
+
+	<script src="http://cdnjs.cloudflare.com/ajax/libs/lodash.js/0.6.1/lodash.min.js"></script>
+	<script src="script/victor.js"></script>
+	<script>window.Victor = Raphael.ninja();</script>
+	<script src="http://cdnjs.cloudflare.com/ajax/libs/raphael/2.1.0/raphael.js"></script>
+	<!--<script src="script/raphael.js"></script>-->
+	<script src="script/svgtojs.js"></script>
+	<script>
+		var file = $("#file"),
+			input = $("#input"),
+			output = $("#output"),
+			convert = $("#convert"),
+			textarea = $("#textarea"),
+			render = $("#render");
+
+		file.value = "";
+		file.onchange = function( event ) {
+			if ( !file.files.length ) { return; }
+
+			var freader = new FileReader();
+			freader.onload = function( e ) {
+				input.innerHTML = e.target.result;
+			};
+			freader.readAsText( file.files[0] );
+
+		};
+
+		convert.onclick = function() {
+			if ( input.innerHTML == "" ) { return; }
+
+			textarea.value = JSON.stringify( svgtojs( input.firstElementChild ) );
+		};
+
+		render.onclick = function() {
+			if ( textarea.value == "" ) { return; }
+
+			dummyRenderer( JSON.parse( textarea.value ) );
+		};
+
+		function $( selector ) {
+			return document.querySelector( selector );
+		}
+
+		function dummyRenderer( obj ) {
+			output.innerHTML = "";
+
+			var paper = Victor( output, obj.width, obj.height );
+
+			_.each( obj.children, function( child ) {
+				var style = child.style,
+					tmp;
+
+				// Raphael has strange defaults
+				!style.fill && ( style.fill = "none" );
+				!style.stroke && ( style.stroke = "none" );
+
+				// convert gradients in raphael format
+				if ( typeof style.fill != "string" ) {
+					// you can get "to transparent" gradients in raphael by setting the fill-opacity to less than 1
+					if ( ( tmp = style.fill.stops[1].substr(7) ) ) {
+						style["fill-opacity"] = parseInt( tmp, 16 ) / 255;
+					}
+					style.fill = style.fill.angle + "-" + style.fill.stops[0].substr(0,7) + "-" + style.fill.stops[1].substr(0,7);
+				}
+
+				paper[ child.type ].apply( paper, child.attrs ).attr( style );
+			});
+		}
+	</script>
+</body>
+</html>

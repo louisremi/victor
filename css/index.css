@@ -23,6 +23,18 @@ header h2 {
 	padding-left: 40px;
 }
 
+#tiger {
+	text-align: center;
+	margin-top: 130px;
+	margin-right: 20px;
+}
+
+#canvas-input {
+	background-size: contain;
+	background-position: center;
+	background-repeat: no-repeat;
+}
+
 #file-input {
 	opacity: 0;
 	position: absolute;
@@ -45,13 +57,11 @@ header h2 {
 .square {
 	border: 1px solid #ddd;
 	border-radius: 4px;
-	min-height: 280px;
+	height: 280px;
 }
 .loading {
 	background: url("../img/loader.gif") 115px 115px no-repeat;
-}
-.rendered {
-	border: none;
+	background-size: inherit !important;
 }
 
 .small-list {
