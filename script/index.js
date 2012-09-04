@@ -40,7 +40,8 @@ $tigerButton.onclick = function() {
 	onfileButtonClick( false );
 
 	var fileReq = new XMLHttpRequest();
-	fileReq.open("GET", "../samples/tiger.svg", true);
+	// prepend /victor to the sample URL, when on github
+	fileReq.open("GET", ( /github/.test( location ) ? "/victor" : "" ) + "/samples/tiger.svg", true);
 	fileReq.responseType = "arraybuffer";
 	 
 	fileReq.onload = function() {
@@ -86,7 +87,7 @@ function convertFile( file ) {
 	freader1.readAsText( file );
 
 	// display a thumbnail of the svg
-	freader2.onload = function( e ) {console.log( e.target.result )
+	freader2.onload = function( e ) {
 		$canvasInput.style.backgroundImage = "url('" + e.target.result + "')";
 
 		c( $canvasInput, "remove", "loading" );
