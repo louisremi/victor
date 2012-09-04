@@ -35,7 +35,6 @@ var Shapes = {
 	divStyle,
 	serializeHooks,
 	rfont = /^font/,
-	risrgb = /^rgb\(/,
 	rpoints = /(\d*,\d*) /,
 	rrgb = /\D*(\d*)\D*/g,
 	risgradient = /^url\(/,
@@ -89,8 +88,8 @@ window.svgtojs = function( svg, precision ) {
 			if ( rfont.test( prop ) && nodeName != "text" ) { return; }
 
 			var tmp = computedStyle.getPropertyValue( prop == "transform" ? transform : prop );
-			
-			if ( tmp != defaultValue ) {
+
+			if ( tmp && tmp != defaultValue ) {
 				// apply serialize hook if any
 				if ( serializeHooks[ prop ] ) {
 					tmp = serializeHooks[ prop ]( tmp, svg );
@@ -117,13 +116,11 @@ window.svgtojs = function( svg, precision ) {
 
 function serializeColor( color, svg ) {
 	// rgb( ... ) color
-	if ( risrgb.test( color ) ) {
-		color = "#" + color.replace( rrgb, function( a, b ) {
-			return b ? (+b < 15 ? "0" : "") + (+b).toString(16) : b;
-		});
+	if ( !risgradient.test( color ) ) {
+		color = Raphael.getRGB( color ).hex;
 
 	// gradient
-	} else if ( risgradient.test( color ) ) {
+	} else {
 		var gradient = svg.getElementById( color.replace( rgradient, "$1") ),
 			stops = svg.getElementById( gradient.getAttribute("xlink:href").replace("#","") ).getElementsByTagName("stop"),
 			stopValues = {};
@@ -152,8 +149,6 @@ function serializeColor( color, svg ) {
 			color = undefined;
 		}
 
-	} else {
-		color = undefined;
 	}
 
 	return color;

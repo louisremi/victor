@@ -1,0 +1,59 @@
+body {
+	font-family: "Arial", "Liberations Sans", sans-serif;
+}
+
+header {
+	font-family: "Helvetica", sans-serif;
+	display: table;
+}
+
+.row-offset {
+	margin-top: 30px;
+}
+
+header h1, header h2 {
+	display: table-cell;
+}
+header h1 {
+	font-size: 50px;
+}
+header h2 {
+	font-size: 18px;
+	font-weight: normal;
+	padding-left: 40px;
+}
+
+#file-input {
+	opacity: 0;
+	position: absolute;
+	z-index: -1;
+}
+
+#json-output {
+	resize: none;
+	float: left;
+	margin-left: 20px;
+	padding: 0 4px;
+	min-height: 280px;
+}
+
+#svg-frame {
+	position: absolute;
+	top:0;left:0;
+}
+
+.square {
+	border: 1px solid #ddd;
+	border-radius: 4px;
+	min-height: 280px;
+}
+.loading {
+	background: url("../img/loader.gif") 115px 115px no-repeat;
+}
+.rendered {
+	border: none;
+}
+
+.small-list {
+	font-size: 13px;
+}
