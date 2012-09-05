@@ -13,10 +13,8 @@
 
         <!-- Place favicon.ico and apple-touch-icon.png in the root directory -->
 
-        <!--<link rel="stylesheet" href="css/normalize.css">-->
-        <link rel="stylesheet" href="http://twitter.github.com/bootstrap/assets/css/bootstrap.css">
-        <link rel="stylesheet" href="css/index.css">
-        <script src="http://www.google-analytics.com/ga.js"></script>
+        <link rel="stylesheet" href="assets/css/bootstrap.css">
+        <link rel="stylesheet" href="assets/css/index.css">
     </head>
     <body>
         <!--[if lt IE 7]>
@@ -28,12 +26,13 @@
     <header class="row-offset">
         <h1>Victor</h1>
         <h2>Convert your SVG files to lightweight, Raphael-compatible JSON</h2>
+        <a href="https://github.com/louisremi/victor/"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_gray_6d6d6d.png" alt="Fork me on GitHub"></a>
     </header>
 
     <div class="row row-offset">
         <div class="span2 offset5 pagination-centered">
             <input type="file" accept="image/*" id="file-input" />
-            <input type="button" id="file-button" class="btn btn-large btn-primary" value="Select File"/>
+            <a id="file-button" class="btn btn-large btn-primary"><i class="icon-file icon-large icon-white"></i> Select File</a>
         </div>
     </div>
 
@@ -46,7 +45,16 @@
         <div class="span4 square" id="canvas-input">
             <p id="tiger">Give the <input type="button" class="btn btn-small" id="tiger-button" value="Tiger"/> a try</p>
         </div>
-        <textarea class="span4 square" id="json-output" resizable=false></textarea>
+        <div class="span4 square">
+            <textarea id="json-output" resizable=false></textarea>
+            <div id="json-options" class="btn-group">
+                <a class="btn btn-link disabled">Options</a>
+                <a class="btn">Copy</a>
+                <form>
+                    <label class="checkbox"><input type="checkbox" checked> Bundle with renderer</label>
+                </form>
+            </div>
+        </div>
         <div id="canvas-output" class="span4 square">
         </div>
     </div>
@@ -57,32 +65,26 @@
             <p>Raphael supports only a subset of SVG features <small>(for the sake of VML compatibility)</small>. Here's a list of the most notable limitations:</p>
             <ul class="small-list">
                 <li>
-                    no <code>&lt;g&gt;</code> elements (see <a href="http://raphaeljs.com/reference.html#Paper.set">Paper.set()</a> alternative),
+                    no <code>&lt;g&gt;</code>, <code>&lt;switch&gt;</code> or <code>&lt;tspan&gt;</code> elements,
                 </li>
                 <li>
-                    no <code>&lt;switch&gt;</code> elements,
+                    no <code>filter</code>s (shadow, blur, etc.),
                 </li>
                 <li>
-                    no <code>filter</code> elements (blur, shadow, etc.),
-                </li>
-                <li>
-                    limited support of <code>stroke-dasharray</code> (see <a href="http://raphaeljs.com/reference.html#Element.attr">Element.attr()</a>),
-                </li>
-                <li>
-                    no support of <code>marker-*</code> (see <code>arrow-end</code> in <a href="http://raphaeljs.com/reference.html#Element.attr">Element.attr()</a>),
-                </li>
-                <li>
-                    specific syntax for gradients, limited to simple gradients for <code>&lt;path&gt;</code> elements
-                    (see Gradients in <a href="http://raphaeljs.com/reference.html#Element.attr">Element.attr()</a>).
+                    limited support of <code>stroke-dasharray</code>, <code>marker-*</code>, <code>clip-path</code> and gradients (see <a href="http://raphaeljs.com/reference.html#Element.attr">Element.attr()</a>),
                 </li>
             </ul>
             <p>In addition, Victor doesn't yet fully support the following Raphael features:</p>
             <ul class="small-list">
-                <li>conversion of <code>&lt;g&gt;</code> elements (planned),</li>
-                <li>conversion of <code>transform</code>s (planned),</li>
-                <li>approximative conversion of gradients (planned),</li>
-                <li>approximative conversion of <code>marker-end</code> (planned),</li>
-                <li><code>clip-rect</code>, <code>stroke-dasharray</code>, <code>stroke-linejoin</code>, <code>stroke-linecap</code>, <code>stroke-miterlimit</code> (trivial).</li>
+                <li>
+                    approximative conversion of <code>&lt;g&gt;</code>, <code>&lt;switch&gt;</code> and <code>&lt;tspan&gt;</code> elements (planned),
+                </li>
+                <li>
+                    conversion of <code>transform</code>s (planned),
+                </li>
+                <li>
+                    approximative conversion of <code>stroke-dasharray</code>, <code>marker-*</code>, <code>clip-path</code> and gradients (planned).
+                </li>
             </ul>
         </div>
         <div class="span5 offset2">
@@ -103,17 +105,17 @@
     <iframe id="svg-frame" class="invisible" frameborder=0></iframe>
 
 </div>
-        <script src="http://cdnjs.cloudflare.com/ajax/libs/lodash.js/0.6.1/lodash.min.js"></script>
-        <script src="script/victor.js"></script>
-        <script>window.Victor = Raphael.ninja();</script>
-        <script src="http://cdnjs.cloudflare.com/ajax/libs/raphael/2.1.0/raphael-min.js"></script>
-        <!--<script src="script/raphael.js"></script>-->
-        <script src="script/svgtojs.js"></script>
-        <script src="script/index.js"></script>
+        <script src="assets/js/lodash.js"></script>
+        <script>Zepto=function(l){var f=function(){};return {0:l,attr:f,html:f}};</script>
+        <script src="assets/js/backbone.js"></script>
+        <script src="assets/js/raphael.js"></script>
+        <script src="assets/js/svgtojs.js"></script>
+        <script src="assets/js/jstosvg.js"></script>
+        <script src="app/index.js"></script>
 
-        <!-- Google Analytics: change UA-XXXXX-X to be your site's ID. -->
+        <!-- Google Analytics -->
         <script>
-            var _gaq=[['_setAccount','UA-XXXXX-X'],['_trackPageview']];
+            var _gaq=[['_setAccount','UA-34580038-1'],['_trackPageview']];
             (function(d,t){var g=d.createElement(t),s=d.getElementsByTagName(t)[0];
             g.src=('https:'==location.protocol?'//ssl':'//www')+'.google-analytics.com/ga.js';
             s.parentNode.insertBefore(g,s)}(document,'script'));

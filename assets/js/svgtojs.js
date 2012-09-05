@@ -22,6 +22,9 @@ var Shapes = {
 		"stroke": "none",
 		"stroke-opacity": 1,
 		"stroke-width": "1px",
+		"stroke-linejoin": "miter",
+		"stroke-linecap": "butt",
+		"stroke-miterlimit": 4,
 		"transform": "none"
 	},
 	transform,
