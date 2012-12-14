@@ -24,10 +24,7 @@ var SvgFile = Backbone.Model.extend({
 			fileReq.responseType = "arraybuffer";
 			 
 			fileReq.onload = function() {
-				var blobBuilder = new BlobBuilder();
-				blobBuilder.append( fileReq.response );
-				
-				self.load( blobBuilder.getBlob("image/svg+xml") );
+				self.load( new Blob( [fileReq.response], {type: "image/svg+xml" } ) );
 			};
 			fileReq.send();
 		
@@ -99,15 +96,19 @@ var JsonView = Backbone.View.extend({
 });
 
 var RaphaelView = Backbone.View.extend({
-	render: function() {
-		if ( this.model.json == "" ) { return; }
+	events: {
+		change: "render"
+	},
 
-		var obj = JSON.parse( this.model.json ),
-			width = Math.ceil( json.width ),
-			height = Math.ceil( json.height );
+	render: function( json ) {
+		if ( json == "" ) { return; }
 
-		json.width = 300;
-		json.height = 300;
+		var obj = JSON.parse( json ),
+			width = Math.ceil( obj.width ),
+			height = Math.ceil( obj.height );
+
+		obj.width = 300;
+		obj.height = 300;
 
 		this.el.innerHTML = "";
 
@@ -139,7 +140,7 @@ $fileButton.onclick = function() {
 	jsonOutput.set( "loading", true );
 
 	$fileInput.click();
-}
+};
 
 svgFile.on("change", function() {
 	if ( svgFile.hasChanged( "loading" ) ) {
@@ -157,17 +158,18 @@ svgFile.on("change", function() {
 svgFile.on("change", function() {
 	if ( svgFile.hasChanged( "html" ) ) {
 		$svgFrame.body.innerHTML = svgFile.get("html");
-		jsonOutput.set( "json", JSON.stringify( svgtojs( $svgFrame.querySelector("svg") ) ) )
-		console.log( jsonOutput.get("json") );
+		jsonOutput.set( "json", JSON.stringify( svgtojs( $svgFrame.querySelector("svg") ) ) );
 		jsonView.render();
 	}
 });
 
 jsonOutput.on("change", function() {
-	if ( svgFile.hasChanged("loading") ) {
+	if ( jsonOutput.hasChanged("loading") ) {
 		c( jsonView.el,  jsonOutput.get("loading") ? "add" : "remove", "loading" );
 		c( raphaelView.el,  jsonOutput.get("loading") ? "add" : "remove", "loading" );
 	}
+
+	raphaelView.render( this.get("json") );
 });
 
 $fileInput.onchange = function( event ) {
