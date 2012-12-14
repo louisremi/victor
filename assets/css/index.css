@@ -56,11 +56,11 @@ header h2 {
 	height: 300px;
 	background: white;
 	opacity: .8;
-	-webkit-transition: top 500ms;
-	   -moz-transition: top 500ms;
-	    -ms-transition: top 500ms;
-	     -o-transition: top 500ms;
-	        transition: top 500ms;
+	-webkit-transition: top .3s;
+	   -moz-transition: top .3s;
+	    -ms-transition: top .3s;
+	     -o-transition: top .3s;
+	        transition: top .3s;
 }
 #json-options:hover {
 	top: -1px;

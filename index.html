@@ -106,7 +106,9 @@
 
 </div>
         <script src="assets/js/lodash.js"></script>
-        <script>Zepto=function(l){var f=function(){};return {0:l,attr:f,html:f}};</script>
+        <script>
+            Zepto=function(l){var f=function(){};return {0:l,attr:f,html:f,unbind:f,bind:function(n,c){l["on"+n.split(".")[0]]=c}}};
+        </script>
         <script src="assets/js/backbone.js"></script>
         <script src="assets/js/raphael.js"></script>
         <script src="assets/js/svgtojs.js"></script>
